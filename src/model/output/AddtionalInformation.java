@@ -99,11 +99,13 @@ public class AddtionalInformation implements Comparable{
 	public void setComilla(String comilla) {
 		this.comilla = comilla;
 	}
+
 	@Override
 	public int compareTo(Object arg0) {
-		return this.startDate.compareTo( ( (AddtionalInformation) arg0).getStartDate());
+		int r = this.startDate.compareTo( ( (AddtionalInformation) arg0).getStartDate());
+		return r;
 		
-		
+
 	}
 	
 	

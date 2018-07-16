@@ -86,12 +86,12 @@ public class File {
 					if(!(currentAdd.getConcept().equals("10S1") || currentAdd.getConcept().equals("10S2") || currentAdd.getConcept().equals("21B4"))){
 					//if(!(currentAdd.getConcept().equals("10S1") || currentAdd.getConcept().equals("10S2"))){
 						Date tempEndDate = null;
-						for(int k = lastRead; k< j+1 ; k++){
+						for(int k = lastRead; k< j+1  ; k++){
 						//for(int k = lastRead; k< currentPay.getAdd().size() ; k++){
-							
+
 							AddtionalInformation currentAddAux = new AddtionalInformation(currentPay.getAdd().get(k));
 							if(currentAdd.getStartDate().before(currentAddAux.getEndDate()) && currentAdd.getStartDate().compareTo(currentAddAux.getStartDate()) != 0 ){
-								// = 
+								// =
 								if(tempEndDate == null){
 									tempEndDate = currentAdd.getEndDate();
 								}else{
@@ -102,38 +102,34 @@ public class File {
 								cal.setTime(currentAdd.getStartDate());
 								cal.add(Calendar.DATE, -1);
 								Date dateBefore1Days = cal.getTime();
-								
+
 								currentAddAux.setEndDate(dateBefore1Days);
 
 								newPays.add(currentAddAux);
 								currentAddAux = new AddtionalInformation(currentPay.getAdd().get(k));
 								currentAddAux.setStartDate(currentAdd.getStartDate());
-								newPays.add(currentAddAux);			
-																
+								newPays.add(currentAddAux);
+
 							}else{
-								//aca entran 
-								//if((currentAddAux.getConcept().equals("10S1") || currentAddAux.getConcept().equals("10S2") || currentAddAux.getConcept().equals("21B4"))){
-								if((currentAddAux.getConcept().equals("10S1") || currentAddAux.getConcept().equals("10S2"))){
+								//aca entran
+								if((currentAddAux.getConcept().equals("10S1") || currentAddAux.getConcept().equals("10S2") || currentAddAux.getConcept().equals("21B4"))){
+								//if((currentAddAux.getConcept().equals("10S1") || currentAddAux.getConcept().equals("10S2"))){
 									newPays.add(currentAddAux);
 								}else{
 									if(tempEndDate != null){
 										currentAddAux = new AddtionalInformation(currentAdd);
 										currentAddAux.setEndDate(tempEndDate);
 										newPays.add(currentAddAux);
-										
 										Calendar cal = Calendar.getInstance();
 										cal.setTime(tempEndDate);
 										cal.add(Calendar.DATE, +1);
 										Date dateAfter1Days = cal.getTime();
-										
 										currentAddAux = new AddtionalInformation(currentAdd);
 										currentAddAux.setStartDate(dateAfter1Days);
 										newPays.add(currentAddAux);
 									}else
 										newPays.add(currentAddAux);
-			
 								}
-								
 							}
 							lastRead = k;
 							
@@ -149,7 +145,48 @@ public class File {
 		
 		return currentList;
 	}
-    
+
+
+	public List<PayRecurrentOutput> orderbyDataRange(List<PayRecurrentOutput> currentList)throws FileNotFoundException, IOException, ParseException{
+
+		for(int i=0; i< currentList.size(); i ++){
+			PayRecurrentOutput currentPay = currentList.get(i);
+			Long pricipalsSalaries = currentPay.getAdd().stream().filter(filtro -> filtro.getConcept().equals("10S1") || filtro.getConcept().equals("10S2") || filtro.getConcept().equals("21B4")  ).count();
+			if(pricipalsSalaries != currentPay.getAdd().size()){
+				List<AddtionalInformation> newPays = new ArrayList<AddtionalInformation>();
+				newPays = currentPay.getAdd();
+				for(int j = 0; j< currentPay.getAdd().size(); j++){
+					AddtionalInformation currentAdd = new AddtionalInformation(currentPay.getAdd().get(j));
+					if(!(currentAdd.getConcept().equals("10S1") || currentAdd.getConcept().equals("10S2") || currentAdd.getConcept().equals("21B4"))){
+
+						for(int k = 0; k< currentPay.getAdd().size(); k++){
+
+							if(currentAdd.getEndDate().after(currentPay.getAdd().get(k).getStartDate()) && k>j){
+								//change positions
+								AddtionalInformation currentAddAuxJ = new AddtionalInformation(currentPay.getAdd().get(j));
+								AddtionalInformation currentAddAuxK = new AddtionalInformation(currentPay.getAdd().get(k));
+								newPays.set(k,currentAddAuxJ);
+								newPays.set(j,currentAddAuxK);
+
+							}
+
+							//AddtionalInformation currentAdd = new AddtionalInformation(currentPay.getAdd().get(j));
+
+						}
+
+
+
+						}
+
+				}
+				currentPay.setAdd(newPays);
+
+			}
+		}
+
+		return currentList;
+	}
+
     
     public List<PayRecurrentOutput> read(String fileName)throws FileNotFoundException, IOException, ParseException{
         String cadena;
